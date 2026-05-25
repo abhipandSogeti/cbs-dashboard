@@ -2,6 +2,7 @@
 import {
   useReactTable,
   getCoreRowModel,
+  getFilteredRowModel,
   flexRender,
   type ColumnDef,
   type PaginationState,
@@ -72,9 +73,11 @@ export const DataTable = <T,>({
     onPaginationChange,
     onSortingChange,
     onColumnVisibilityChange,
+    onGlobalFilterChange,
     manualPagination: true,
     manualSorting: true,
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
   })
 
   if (error !== null) return <TableError message={error.message} />

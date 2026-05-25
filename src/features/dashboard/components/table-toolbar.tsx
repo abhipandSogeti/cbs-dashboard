@@ -18,7 +18,9 @@ const exportToCsv = <T,>(table: Table<T>) => {
   const a = document.createElement('a')
   a.href = url
   a.download = 'cbs-export.csv'
+  document.body.appendChild(a)
   a.click()
+  document.body.removeChild(a)
   URL.revokeObjectURL(url)
 }
 
