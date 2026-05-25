@@ -7,10 +7,8 @@
     "jsx": "react-jsx",
     "strict": true,
     "noUncheckedIndexedAccess": true,
-    "baseUrl": ".",
-    "paths": { "@/*": ["src/*"] },
-    "ignoreDeprecations": "6.0",
-    "skipLibCheck": true
+    "paths": { "@/*": ["./src/*"] },
+"skipLibCheck": true
   },
   "include": ["src", "tests"]
 }
