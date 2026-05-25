@@ -1,5 +1,5 @@
 import { cbsRawResponseSchema } from '@/shared/types/api';
-const CBS_BASE = 'https://opendata.cbs.nl/ODataApi/odata';
+const CBS_BASE = 'https://opendata.cbs.nl/ODataFeed/odata';
 export const buildUrl = ({ datasetId, top, skip, orderBy, filter }) => {
     const params = new URLSearchParams({
         '$format': 'json',
@@ -21,8 +21,12 @@ export const fetchCbsDataset = async (params, itemSchema) => {
     if (!parsed.success) {
         throw new Error(`Unexpected CBS response shape: ${parsed.error.message}`);
     }
-    return {
-        total: parsed.data['odata.count'],
-        rows: parsed.data.value,
-    };
+    return { total: 0, rows: parsed.data.value };
+};
+export const fetchCbsCount = async (datasetId) => {
+    const res = await fetch(`${CBS_BASE}/${datasetId}/TypedDataSet/$count`);
+    if (!res.ok) throw new Error(`CBS count error ${res.status} for ${datasetId}`);
+    const text = await res.text();
+    const count = parseInt(text.trim(), 10);
+    return isNaN(count) ? 0 : count;
 };

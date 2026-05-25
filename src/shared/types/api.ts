@@ -16,6 +16,10 @@ export type CbsResponse<T> = {
 
 export const cbsRawResponseSchema = <T extends z.ZodTypeAny>(itemSchema: T) =>
   z.object({
-    'odata.count': z.string().transform(Number),
     value: z.array(itemSchema),
   })
+
+export type ApiError = {
+  status: number
+  message: string
+}

@@ -1,5 +1,5 @@
 import { useQuery, keepPreviousData } from '@tanstack/react-query'
-import { fetchCbsDataset } from '@/shared/lib/cbs-fetch'
+import { fetchCbsDataset, fetchCbsCount } from '@/shared/lib/cbs-fetch'
 import { PopulationRowSchema } from '../types/population.schema'
 import { populationConfig } from '../config/population.config'
 import type { TableState } from '../store/dashboard.store'
@@ -7,10 +7,17 @@ import type { TableState } from '../store/dashboard.store'
 export const usePopulation = (tableState: TableState) => {
   const { pagination, sorting } = tableState
   const sortCol = sorting[0]
-  const queryKey = ['population', pagination, sorting] as const
 
-  const result = useQuery({
-    queryKey,
+  const countQuery = useQuery({
+    queryKey: ['count', populationConfig.datasetId] as const,
+    queryFn: () => fetchCbsCount(populationConfig.datasetId),
+    staleTime: 5 * 60_000,
+  })
+
+  const dataQueryKey = ['population', pagination, sorting] as const
+
+  const dataQuery = useQuery({
+    queryKey: dataQueryKey,
     queryFn: () =>
       fetchCbsDataset(
         {
@@ -27,5 +34,12 @@ export const usePopulation = (tableState: TableState) => {
     staleTime: 60_000,
   })
 
-  return { ...result, queryKey }
+  return {
+    data: dataQuery.data !== undefined
+      ? { rows: dataQuery.data.rows, total: countQuery.data ?? 0 }
+      : undefined,
+    isLoading: dataQuery.isLoading,
+    error: dataQuery.error,
+    queryKey: dataQueryKey,
+  }
 }

@@ -1,27 +1,9 @@
-const columns = [
-    {
-        accessorKey: 'Perioden',
-        header: 'Period',
-        cell: (info) => info.getValue(),
-    },
-    {
-        accessorKey: 'BrutoProductie_1',
-        header: 'Gross Output (M€)',
-        cell: (info) => {
-            const val = info.getValue();
-            return val !== null ? val.toLocaleString('nl-NL') : '-';
-        },
-    },
-    {
-        accessorKey: 'ToegegevoedeWaarde_2',
-        header: 'Value Added (M€)',
-        cell: (info) => {
-            const val = info.getValue();
-            return val !== null ? val.toLocaleString('nl-NL') : '-';
-        },
-    },
-];
 export const economyConfig = {
-    datasetId: '84410NED',
-    columns,
+    datasetId: '70076ned',
+    columns: [
+        { accessorKey: 'Perioden', header: 'Period', cell: (info) => info.getValue() },
+        { accessorKey: 'GoederenEnDiensten', header: 'Goods & Services', cell: (info) => info.getValue().trim() },
+        { accessorKey: 'Volumemutaties_1', header: 'Volume Change %', cell: (info) => { const val = info.getValue(); return val !== null ? `${val.toFixed(1)}%` : '-'; } },
+        { accessorKey: 'Indexcijfers2000100_3', header: 'Index (2000=100)', cell: (info) => { const val = info.getValue(); return val !== null ? val.toFixed(1) : '-'; } },
+    ],
 };

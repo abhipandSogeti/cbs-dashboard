@@ -18,9 +18,8 @@ const createWrapper = () => {
 describe('usePopulation', () => {
     it('returns parsed rows on successful CBS response', async () => {
         const { result } = renderHook(() => usePopulation(defaultTableState), { wrapper: createWrapper() });
-        await waitFor(() => expect(result.current.isSuccess).toBe(true));
-        expect(result.current.data?.rows).toHaveLength(20);
-        expect(result.current.data?.total).toBe(1000);
+        await waitFor(() => expect(result.current.data?.rows).toHaveLength(20), { timeout: 3000 });
+        await waitFor(() => expect(result.current.data?.total).toBe(1000), { timeout: 3000 });
     });
     it('changes queryKey when pagination changes', () => {
         const { result, rerender } = renderHook(({ page }) => usePopulation({ ...defaultTableState, pagination: { pageIndex: page, pageSize: 20 } }), { wrapper: createWrapper(), initialProps: { page: 0 } });

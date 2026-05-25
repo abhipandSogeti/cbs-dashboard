@@ -3,7 +3,7 @@ import { z } from 'zod'
 import type { CbsParams, CbsResponse } from '@/shared/types/api'
 import { cbsRawResponseSchema } from '@/shared/types/api'
 
-const CBS_BASE = 'https://opendata.cbs.nl/ODataApi/odata'
+const CBS_BASE = 'https://opendata.cbs.nl/ODataFeed/odata'
 
 export const buildUrl = ({ datasetId, top, skip, orderBy, filter }: CbsParams): string => {
   const params = new URLSearchParams({
@@ -34,8 +34,13 @@ export const fetchCbsDataset = async <T>(
     throw new Error(`Unexpected CBS response shape: ${parsed.error.message}`)
   }
 
-  return {
-    total: parsed.data['odata.count'],
-    rows: parsed.data.value,
-  }
+  return { total: 0, rows: parsed.data.value }
+}
+
+export const fetchCbsCount = async (datasetId: string): Promise<number> => {
+  const res = await fetch(`${CBS_BASE}/${datasetId}/TypedDataSet/$count`)
+  if (!res.ok) throw new Error(`CBS count error ${res.status} for ${datasetId}`)
+  const text = await res.text()
+  const count = parseInt(text.trim(), 10)
+  return isNaN(count) ? 0 : count
 }

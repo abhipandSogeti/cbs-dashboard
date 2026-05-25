@@ -1,13 +1,18 @@
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
-import { fetchCbsDataset } from '@/shared/lib/cbs-fetch';
+import { fetchCbsDataset, fetchCbsCount } from '@/shared/lib/cbs-fetch';
 import { PopulationRowSchema } from '../types/population.schema';
 import { populationConfig } from '../config/population.config';
 export const usePopulation = (tableState) => {
     const { pagination, sorting } = tableState;
     const sortCol = sorting[0];
-    const queryKey = ['population', pagination, sorting];
-    const result = useQuery({
-        queryKey,
+    const countQuery = useQuery({
+        queryKey: ['count', populationConfig.datasetId],
+        queryFn: () => fetchCbsCount(populationConfig.datasetId),
+        staleTime: 5 * 60_000,
+    });
+    const dataQueryKey = ['population', pagination, sorting];
+    const dataQuery = useQuery({
+        queryKey: dataQueryKey,
         queryFn: () => fetchCbsDataset({
             datasetId: populationConfig.datasetId,
             top: pagination.pageSize,
@@ -19,5 +24,12 @@ export const usePopulation = (tableState) => {
         placeholderData: keepPreviousData,
         staleTime: 60_000,
     });
-    return { ...result, queryKey };
+    return {
+        data: dataQuery.data !== undefined
+            ? { rows: dataQuery.data.rows, total: countQuery.data ?? 0 }
+            : undefined,
+        isLoading: dataQuery.isLoading,
+        error: dataQuery.error,
+        queryKey: dataQueryKey,
+    };
 };

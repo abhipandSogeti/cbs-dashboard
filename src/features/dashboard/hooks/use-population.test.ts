@@ -26,9 +26,8 @@ describe('usePopulation', () => {
       () => usePopulation(defaultTableState),
       { wrapper: createWrapper() }
     )
-    await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    expect(result.current.data?.rows).toHaveLength(20)
-    expect(result.current.data?.total).toBe(1000)
+    await waitFor(() => expect(result.current.data?.rows).toHaveLength(20), { timeout: 3000 })
+    await waitFor(() => expect(result.current.data?.total).toBe(1000), { timeout: 3000 })
   })
 
   it('changes queryKey when pagination changes', () => {

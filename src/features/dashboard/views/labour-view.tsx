@@ -16,7 +16,7 @@ export const LabourView = () => {
 
   const firstRow = data?.rows[0]
   const stats = firstRow !== undefined
-    ? [{ label: 'Participation Rate', value: `${firstRow.Arbeidsdeelname_1?.toFixed(1) ?? '-'}%`, sub: 'latest period' }]
+    ? [{ label: 'Labour Force', value: `${(firstRow.NietSeizoengecorrigeerd_1 ?? 0).toLocaleString('nl-NL')}k`, sub: 'x1000 persons' }]
     : []
 
   return (

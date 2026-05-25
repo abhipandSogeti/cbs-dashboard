@@ -7,7 +7,7 @@ import type { TableState } from '../store/dashboard.store'
 import type { PaginationState, SortingState, VisibilityState } from '@tanstack/react-table'
 
 const buildStats = (population: number, growth: number) => [
-  { label: 'Population', value: population.toLocaleString('nl-NL'), sub: 'at period start' },
+  { label: 'Total Population', value: population.toLocaleString('nl-NL'), sub: 'persons' },
   { label: 'Annual Growth', value: growth.toLocaleString('nl-NL'), sub: 'persons' },
 ]
 
@@ -22,8 +22,8 @@ export const PopulationView = () => {
   const firstRow = data?.rows[0]
   const stats = firstRow !== undefined
     ? buildStats(
-        firstRow.BevolkingAanHetBeginVanDePeriode_1 ?? 0,
-        firstRow.TotaleBevolkingsgroei_4 ?? 0
+        firstRow.TotaleBevolking_1 ?? 0,
+        firstRow.TotaleBevolkingsgroei_67 ?? 0
       )
     : []
 

@@ -8,13 +8,21 @@ const columns: ColumnDef<EnergyRow>[] = [
     cell: (info) => info.getValue<string>(),
   },
   {
-    accessorKey: 'EnergiedragerSoorten',
+    accessorKey: 'Energiedragers',
     header: 'Energy Source',
-    cell: (info) => info.getValue<string>(),
+    cell: (info) => info.getValue<string>().trim(),
   },
   {
-    accessorKey: 'TotaalBinnenlandsBrutoVerbruik_1',
-    header: 'Total Consumption (PJ)',
+    accessorKey: 'TotaalAanbodTPES_1',
+    header: 'Total Supply (PJ)',
+    cell: (info) => {
+      const val = info.getValue<number | null>()
+      return val !== null ? val.toLocaleString('nl-NL') : '-'
+    },
+  },
+  {
+    accessorKey: 'NettoInvoer_5',
+    header: 'Net Import (PJ)',
     cell: (info) => {
       const val = info.getValue<number | null>()
       return val !== null ? val.toLocaleString('nl-NL') : '-'

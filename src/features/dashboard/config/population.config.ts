@@ -8,21 +8,32 @@ const columns: ColumnDef<PopulationRow>[] = [
     cell: (info) => info.getValue<string>(),
   },
   {
-    accessorKey: 'RegioS',
-    header: 'Region',
-    cell: (info) => info.getValue<string>().trim(),
-  },
-  {
-    accessorKey: 'BevolkingAanHetBeginVanDePeriode_1',
-    header: 'Population',
+    accessorKey: 'TotaleBevolking_1',
+    header: 'Total Population',
     cell: (info) => {
       const val = info.getValue<number | null>()
       return val !== null ? val.toLocaleString('nl-NL') : '-'
     },
   },
   {
-    accessorKey: 'TotaleBevolkingsgroei_4',
-    header: 'Growth',
+    accessorKey: 'Mannen_2',
+    header: 'Men',
+    cell: (info) => {
+      const val = info.getValue<number | null>()
+      return val !== null ? val.toLocaleString('nl-NL') : '-'
+    },
+  },
+  {
+    accessorKey: 'Vrouwen_3',
+    header: 'Women',
+    cell: (info) => {
+      const val = info.getValue<number | null>()
+      return val !== null ? val.toLocaleString('nl-NL') : '-'
+    },
+  },
+  {
+    accessorKey: 'TotaleBevolkingsgroei_67',
+    header: 'Population Growth',
     cell: (info) => {
       const val = info.getValue<number | null>()
       return val !== null ? val.toLocaleString('nl-NL') : '-'
@@ -31,6 +42,6 @@ const columns: ColumnDef<PopulationRow>[] = [
 ]
 
 export const populationConfig = {
-  datasetId: '83765NED',
+  datasetId: '37296ned',
   columns,
 }

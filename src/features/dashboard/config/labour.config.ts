@@ -10,19 +10,32 @@ const columns: ColumnDef<LabourRow>[] = [
   {
     accessorKey: 'Geslacht',
     header: 'Gender',
-    cell: (info) => info.getValue<string>(),
+    cell: (info) => info.getValue<string>().trim(),
   },
   {
-    accessorKey: 'Arbeidsdeelname_1',
-    header: 'Participation %',
+    accessorKey: 'Leeftijd',
+    header: 'Age Group',
+    cell: (info) => info.getValue<string>().trim(),
+  },
+  {
+    accessorKey: 'NietSeizoengecorrigeerd_1',
+    header: 'Labour Force (x1000)',
     cell: (info) => {
       const val = info.getValue<number | null>()
-      return val !== null ? `${val.toFixed(1)}%` : '-'
+      return val !== null ? val.toLocaleString('nl-NL') : '-'
+    },
+  },
+  {
+    accessorKey: 'Seizoengecorrigeerd_2',
+    header: 'Seasonally Adjusted (x1000)',
+    cell: (info) => {
+      const val = info.getValue<number | null>()
+      return val !== null ? val.toLocaleString('nl-NL') : '-'
     },
   },
 ]
 
 export const labourConfig = {
-  datasetId: '85039NED',
+  datasetId: '80590ned',
   columns,
 }

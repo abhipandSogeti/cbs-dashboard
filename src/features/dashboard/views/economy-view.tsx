@@ -17,8 +17,8 @@ export const EconomyView = () => {
   const firstRow = data?.rows[0]
   const stats = firstRow !== undefined
     ? [
-        { label: 'Gross Output', value: `${(firstRow.BrutoProductie_1 ?? 0).toLocaleString('nl-NL')} M€` },
-        { label: 'Value Added',  value: `${(firstRow.ToegegevoedeWaarde_2 ?? 0).toLocaleString('nl-NL')} M€` },
+        { label: 'Volume Change', value: `${firstRow.Volumemutaties_1?.toFixed(1) ?? '-'}%` },
+        { label: 'Index (2000=100)', value: firstRow.Indexcijfers2000100_3?.toFixed(1) ?? '-' },
       ]
     : []
 

@@ -16,7 +16,7 @@ export const EnergyView = () => {
 
   const firstRow = data?.rows[0]
   const stats = firstRow !== undefined
-    ? [{ label: 'Total Consumption', value: `${(firstRow.TotaalBinnenlandsBrutoVerbruik_1 ?? 0).toLocaleString('nl-NL')} PJ`, sub: 'domestic gross' }]
+    ? [{ label: 'Total Supply', value: `${(firstRow.TotaalAanbodTPES_1 ?? 0).toLocaleString('nl-NL')} PJ`, sub: 'TPES' }]
     : []
 
   return (

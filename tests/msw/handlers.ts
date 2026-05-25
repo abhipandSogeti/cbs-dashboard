@@ -1,56 +1,73 @@
+// tests/msw/handlers.ts
 import { http, HttpResponse } from 'msw'
 
-const CBS_BASE = 'https://opendata.cbs.nl/ODataApi/odata'
+const CBS_BASE = 'https://opendata.cbs.nl/ODataFeed/odata'
 
 export const mockPopulationResponse = {
-  'odata.count': '1000',
   value: Array.from({ length: 20 }, (_, i) => ({
     ID: i,
     Perioden: `${2000 + i}JJ00`,
-    RegioS: 'NL01  ',
-    BevolkingAanHetBeginVanDePeriode_1: 17000000 + i * 1000,
-    TotaleBevolkingsgroei_4: 100000 + i * 500,
+    TotaleBevolking_1: 17000000 + i * 10000,
+    Mannen_2: 8500000 + i * 5000,
+    Vrouwen_3: 8500000 + i * 5000,
+    TotaleBevolkingsgroei_67: 80000 + i * 1000,
   })),
 }
 
 export const mockLabourResponse = {
-  'odata.count': '500',
   value: Array.from({ length: 20 }, (_, i) => ({
     ID: i,
-    Perioden: `${2000 + i}JJ00`,
     Geslacht: 'T001038',
-    Arbeidsdeelname_1: 70 + i * 0.2,
+    Leeftijd: '10000',
+    Perioden: `${2000 + i}KW01`,
+    NietSeizoengecorrigeerd_1: 8800 + i * 10,
+    Seizoengecorrigeerd_2: 8850 + i * 10,
   })),
 }
 
 export const mockEconomyResponse = {
-  'odata.count': '200',
   value: Array.from({ length: 20 }, (_, i) => ({
     ID: i,
+    GoederenEnDiensten: 'T001081',
     Perioden: `${2000 + i}JJ00`,
-    BrutoProductie_1: 1200000 + i * 1000,
-    ToegegevoedeWaarde_2: 800000 + i * 500,
+    Volumemutaties_1: 2.1 + i * 0.1,
+    Indexcijfers2000100_3: 100 + i * 3,
   })),
 }
 
 export const mockEnergyResponse = {
-  'odata.count': '300',
   value: Array.from({ length: 20 }, (_, i) => ({
     ID: i,
+    Energiedragers: 'T001027',
     Perioden: `${2000 + i}JJ00`,
-    EnergiedragerSoorten: 'A049649',
-    TotaalBinnenlandsBrutoVerbruik_1: 3000 + i * 10,
+    TotaalAanbodTPES_1: 2800 + i * 10,
+    NettoInvoer_5: 1400 + i * 5,
   })),
 }
 
+const countCounts: Record<string, string> = {
+  '37296ned': '1000',
+  '80590ned': '500',
+  '70076ned': '200',
+  '83140ned': '300',
+}
+
 export const handlers = [
-  http.get(`${CBS_BASE}/83765NED/TypedDataSet`, () =>
+  // Count endpoints — must be before data endpoints so the more-specific path wins
+  http.get(/\/ODataFeed\/odata\/([^/]+)\/TypedDataSet\/\$count/, ({ request }) => {
+    const url = new URL(request.url)
+    const match = url.pathname.match(/\/([^/]+)\/TypedDataSet\/\$count$/)
+    const datasetId = match?.[1] ?? ''
+    return HttpResponse.text(countCounts[datasetId] ?? '0')
+  }),
+  // Data endpoints
+  http.get(`${CBS_BASE}/37296ned/TypedDataSet`, () =>
     HttpResponse.json(mockPopulationResponse)
   ),
-  http.get(`${CBS_BASE}/85039NED/TypedDataSet`, () =>
+  http.get(`${CBS_BASE}/80590ned/TypedDataSet`, () =>
     HttpResponse.json(mockLabourResponse)
   ),
-  http.get(`${CBS_BASE}/84410NED/TypedDataSet`, () =>
+  http.get(`${CBS_BASE}/70076ned/TypedDataSet`, () =>
     HttpResponse.json(mockEconomyResponse)
   ),
   http.get(`${CBS_BASE}/83140ned/TypedDataSet`, () =>

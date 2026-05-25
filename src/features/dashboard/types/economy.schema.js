@@ -1,7 +1,8 @@
 import { z } from 'zod';
 export const EconomyRowSchema = z.object({
     ID: z.number(),
+    GoederenEnDiensten: z.string(),
     Perioden: z.string(),
-    BrutoProductie_1: z.number().nullable(),
-    ToegegevoedeWaarde_2: z.number().nullable(),
+    Volumemutaties_1: z.number().nullable(),
+    Indexcijfers2000100_3: z.number().nullable(),
 });
