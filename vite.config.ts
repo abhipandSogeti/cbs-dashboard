@@ -9,7 +9,7 @@ export default defineConfig({
     alias: { '@': '/src' },
   },
   test: {
-    environment: 'jsdom',
+    environment: 'happy-dom',
     setupFiles: ['./tests/setup.ts'],
     globals: true,
   },
