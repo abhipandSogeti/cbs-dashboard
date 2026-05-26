@@ -32,58 +32,20 @@ type CbsOverviewFlowProps = {
   loading: boolean;
 };
 
-const HUB_POS = { x: 282, y: 210 };
+const HUB_POS = { x: 60, y: 190 };
 const POSITIONS: Record<string, { x: number; y: number }> = {
-  population: { x: 275, y: 20 },
-  labour: { x: 540, y: 200 },
-  economy: { x: 275, y: 380 },
-  energy: { x: 10, y: 200 },
+  population: { x: 320, y: 30 },
+  labour: { x: 580, y: 140 },
+  economy: { x: 560, y: 320 },
+  energy: { x: 300, y: 390 },
 };
 
-// Accent color per region
 const EDGE_COLORS: Record<string, string> = {
-  population: "#60a5fa", // blue  — Europe
-  labour: "#34d399", // green — Americas
-  economy: "#fbbf24", // amber — Asia
-  energy: "#fb923c", // orange — Africa
+  population: "#60a5fa",
+  labour: "#34d399",
+  economy: "#fbbf24",
+  energy: "#fb923c",
 };
-
-// Deterministic particles — no Math.random so no SSR / HMR flicker
-const PARTICLES = Array.from({ length: 30 }, (_, i) => ({
-  id: i,
-  left: `${((i * 37 + 11) % 94) + 3}%`,
-  top: `${((i * 53 + 7) % 88) + 5}%`,
-  size: ((i % 3) + 1.5).toFixed(1),
-  duration: `${9 + (i % 7) * 2.5}s`,
-  delay: `${-((i % 11) * 1.3).toFixed(1)}s`,
-  color: [
-    "rgba(13,148,136,0.55)",
-    "rgba(96,165,250,0.45)",
-    "rgba(167,139,250,0.45)",
-    "rgba(52,211,153,0.45)",
-    "rgba(251,191,36,0.35)",
-  ][i % 5],
-}));
-
-const FloatingParticles = () => (
-  <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-    {PARTICLES.map((p) => (
-      <div
-        key={p.id}
-        className="absolute rounded-full"
-        style={{
-          left: p.left,
-          top: p.top,
-          width: `${p.size}px`,
-          height: `${p.size}px`,
-          background: p.color,
-          boxShadow: `0 0 ${Number(p.size) * 4}px ${p.color}`,
-          animation: `particle-float ${p.duration} ease-in-out ${p.delay} infinite`,
-        }}
-      />
-    ))}
-  </div>
-);
 
 export const CbsOverviewFlow = ({
   categories,
@@ -101,7 +63,7 @@ export const CbsOverviewFlow = ({
         selectable: false,
         draggable: false,
       },
-      ...categories.map((cat) => ({
+      ...categories.map((cat, i) => ({
         id: cat.id,
         type: "category",
         position: POSITIONS[cat.id] ?? { x: 0, y: 0 },
@@ -110,7 +72,8 @@ export const CbsOverviewFlow = ({
           value: loading ? "…" : cat.value,
           trend: cat.trend,
           Icon: cat.Icon,
-          accentColor: EDGE_COLORS[cat.id] ?? "#0d9488",
+          accentColor: EDGE_COLORS[cat.id] ?? "#ff0071",
+          floatDelay: `${i * 1.1}s`,
         },
         selectable: false,
         draggable: false,
@@ -127,9 +90,9 @@ export const CbsOverviewFlow = ({
         target: cat.id,
         animated: true,
         style: {
-          stroke: EDGE_COLORS[cat.id] ?? "#0d9488",
-          strokeWidth: 2.5,
-          filter: `drop-shadow(0 0 6px ${EDGE_COLORS[cat.id] ?? "#0d9488"})`,
+          stroke: EDGE_COLORS[cat.id] ?? "#b1b1b7",
+          strokeWidth: 1.5,
+          strokeDasharray: "6 4",
         },
       })),
     [categories],
@@ -144,10 +107,10 @@ export const CbsOverviewFlow = ({
 
   return (
     <div
-      className="relative h-[540px] rounded-2xl overflow-hidden"
+      className="relative h-[540px] overflow-hidden"
+      style={{ border: "1px solid #e2e2e2", borderRadius: 8 }}
       aria-label="World population overview"
     >
-      <FloatingParticles />
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -155,24 +118,24 @@ export const CbsOverviewFlow = ({
         onNodeClick={handleNodeClick}
         fitView
         fitViewOptions={{ padding: 0.18 }}
-        nodesDraggable={false}
+        nodesDraggable
         nodesConnectable={false}
-        elementsSelectable={false}
+        elementsSelectable
         panOnDrag={false}
         zoomOnScroll={false}
         zoomOnPinch={false}
-        style={{ background: "#060d1a" }}
+        minZoom={0.4}
+        maxZoom={2}
+        colorMode="light"
+        style={{ background: "#fafafa" }}
       >
         <Background
           variant={BackgroundVariant.Dots}
-          gap={28}
-          size={1.2}
-          color="#1e293b"
+          gap={20}
+          size={1}
+          color="#c8c8c8"
         />
-        <Controls
-          showInteractive={false}
-          className="!border-slate-700 !bg-slate-800/80 !shadow-none [&>button]:!border-slate-700 [&>button]:!text-slate-300 [&>button:hover]:!bg-slate-700"
-        />
+        <Controls showInteractive={false} />
       </ReactFlow>
     </div>
   );

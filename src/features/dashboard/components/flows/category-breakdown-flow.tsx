@@ -1,14 +1,17 @@
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useEffect } from "react";
 import {
   ReactFlow,
   Background,
   BackgroundVariant,
+  Panel,
+  useReactFlow,
   type Node,
   type Edge,
   type NodeTypes,
   type NodeMouseHandler,
 } from "@xyflow/react";
 import { clsx } from "clsx";
+import { Landmark, Ruler, Users, GitMerge, X } from "lucide-react";
 import { PrimaryStatNode } from "../nodes/primary-stat-node";
 import { DimensionNode } from "../nodes/dimension-node";
 
@@ -17,11 +20,20 @@ const nodeTypes: NodeTypes = {
   dimension: DimensionNode as NodeTypes[string],
 };
 
+export type CountryDetail = {
+  flag: string;
+  capital: string;
+  area: number | undefined;
+  borders: number;
+  population: string;
+};
+
 export type DimensionItem = {
   id: string;
   label: string;
   value: string;
   isNegative: boolean;
+  detail?: CountryDetail;
 };
 
 type CategoryBreakdownFlowProps = {
@@ -53,6 +65,108 @@ function getDimensionPositions(count: number): Array<{ x: number; y: number }> {
   }));
 }
 
+// ── Inner component: lives inside <ReactFlow> so useReactFlow works ──────────
+type FlowControllerProps = {
+  selectedNodeId: string | null;
+  detail: CountryDetail | undefined;
+};
+
+const FlowController = ({ selectedNodeId, detail }: FlowControllerProps) => {
+  const { fitView } = useReactFlow();
+  const [visible, setVisible] = useState(false);
+
+  // Animate camera to selected node, or reset
+  useEffect(() => {
+    if (selectedNodeId) {
+      fitView({ nodes: [{ id: selectedNodeId }], padding: 1.0, duration: 500 });
+      const t = requestAnimationFrame(() => setVisible(true));
+      return () => cancelAnimationFrame(t);
+    } else {
+      setVisible(false);
+      fitView({ padding: 0.25, duration: 400 });
+    }
+  }, [selectedNodeId, fitView]);
+
+  if (!detail || !selectedNodeId) return null;
+
+  return (
+    <Panel position="bottom-center" style={{ marginBottom: 12 }}>
+      <div
+        className="flex items-center gap-4 px-5 py-3"
+        style={{
+          opacity: visible ? 1 : 0,
+          transform: visible
+            ? "translateY(0px) scale(1)"
+            : "translateY(16px) scale(0.97)",
+          transition: "opacity 0.35s ease, transform 0.35s ease",
+          background: "#fff",
+          border: "1px solid #e2e2e2",
+          borderRadius: 8,
+          boxShadow: "0 4px 16px rgba(0,0,0,0.10)",
+          fontFamily: "Inter, system-ui, sans-serif",
+        }}
+      >
+        <span className="text-3xl leading-none select-none">{detail.flag}</span>
+        <div className="flex items-center gap-4">
+          {detail.capital && (
+            <span
+              className="flex items-center gap-1.5 text-xs"
+              style={{ color: "#6b7280" }}
+            >
+              <Landmark
+                className="h-3.5 w-3.5 shrink-0"
+                style={{ color: "#ff0071" }}
+              />
+              <span style={{ color: "#1a1a1a" }}>{detail.capital}</span>
+            </span>
+          )}
+          {detail.area !== undefined && (
+            <span
+              className="flex items-center gap-1.5 text-xs"
+              style={{ color: "#6b7280" }}
+            >
+              <Ruler
+                className="h-3.5 w-3.5 shrink-0"
+                style={{ color: "#ff0071" }}
+              />
+              <span style={{ color: "#1a1a1a" }}>
+                {detail.area.toLocaleString()} km²
+              </span>
+            </span>
+          )}
+          <span
+            className="flex items-center gap-1.5 text-xs"
+            style={{ color: "#6b7280" }}
+          >
+            <Users
+              className="h-3.5 w-3.5 shrink-0"
+              style={{ color: "#ff0071" }}
+            />
+            <span style={{ color: "#1a1a1a" }}>{detail.population}</span>
+          </span>
+          <span
+            className="flex items-center gap-1.5 text-xs"
+            style={{ color: "#6b7280" }}
+          >
+            <GitMerge
+              className="h-3.5 w-3.5 shrink-0"
+              style={{ color: "#ff0071" }}
+            />
+            <span style={{ color: "#1a1a1a" }}>{detail.borders} borders</span>
+          </span>
+        </div>
+        <span
+          className="flex items-center gap-1 text-xs ml-1"
+          style={{ color: "#b0b0b0" }}
+        >
+          <X className="h-3 w-3" /> dismiss
+        </span>
+      </div>
+    </Panel>
+  );
+};
+
+// ── Main export ───────────────────────────────────────────────────────────────
 export const CategoryBreakdownFlow = ({
   periods,
   selectedPeriod,
@@ -67,13 +181,14 @@ export const CategoryBreakdownFlow = ({
 }: CategoryBreakdownFlowProps) => {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
 
+  const selectedDimension = dimensions.find((d) => d.id === selectedNodeId);
+
   const handleNodeClick = useCallback<NodeMouseHandler>((_evt, node) => {
     if (node.type === "dimension") {
       setSelectedNodeId((prev) => (prev === node.id ? null : node.id));
     }
   }, []);
 
-  // Reset selection when subregion changes
   const handlePeriodChange = useCallback(
     (period: string) => {
       setSelectedNodeId(null);
@@ -83,7 +198,7 @@ export const CategoryBreakdownFlow = ({
   );
 
   const nodes: Node[] = useMemo(() => {
-    if (loading) {
+    if (loading)
       return [
         {
           id: "loading",
@@ -94,23 +209,17 @@ export const CategoryBreakdownFlow = ({
           draggable: false,
         },
       ];
-    }
-    if (error !== null) {
+    if (error !== null)
       return [
         {
           id: "error",
           type: "primaryStat",
           position: { x: 200, y: 100 },
-          data: {
-            label: "Error loading data",
-            value: error.message,
-            sparkData: [],
-          },
+          data: { label: "Error", value: error.message, sparkData: [] },
           selectable: false,
           draggable: false,
         },
       ];
-    }
     const dimPositions = getDimensionPositions(dimensions.length);
     return [
       {
@@ -135,8 +244,9 @@ export const CategoryBreakdownFlow = ({
           value: dim.value,
           isNegative: dim.isNegative,
           isSelected: dim.id === selectedNodeId,
+          detail: dim.detail,
         },
-        selectable: false,
+        selectable: true,
         draggable: false,
       })),
     ];
@@ -153,24 +263,19 @@ export const CategoryBreakdownFlow = ({
 
   const edges: Edge[] = useMemo(() => {
     if (loading || error !== null) return [];
-    const hasSelection = selectedNodeId !== null;
+    const hasSel = selectedNodeId !== null;
     return dimensions.map((dim) => {
-      const isSelected = dim.id === selectedNodeId;
+      const isSel = dim.id === selectedNodeId;
       return {
         id: `primary-${dim.id}`,
         source: "primary",
         target: dim.id,
-        animated: isSelected,
+        animated: isSel,
         style: {
-          stroke: isSelected
-            ? "#ec4899"
-            : hasSelection
-              ? "#cbd5e1"
-              : dim.isNegative
-                ? "#f87171"
-                : "#0d9488",
-          strokeWidth: isSelected ? 2.5 : 1.5,
-          opacity: hasSelection && !isSelected ? 0.35 : 1,
+          stroke: isSel ? "#ff0071" : dim.isNegative ? "#ef4444" : "#b1b1b7",
+          strokeWidth: isSel ? 2 : 1,
+          strokeDasharray: isSel ? undefined : "5 4",
+          opacity: hasSel && !isSel ? 0.25 : 1,
         },
       };
     });
@@ -189,12 +294,20 @@ export const CategoryBreakdownFlow = ({
               key={period}
               onClick={() => handlePeriodChange(period)}
               aria-pressed={period === selectedPeriod}
-              className={clsx(
-                "shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors",
+              style={
                 period === selectedPeriod
-                  ? "bg-teal-600 text-white"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200",
-              )}
+                  ? {
+                      background: "#ff0071",
+                      color: "#fff",
+                      border: "1px solid #ff0071",
+                    }
+                  : {
+                      background: "#fff",
+                      color: "#6b7280",
+                      border: "1px solid #e2e2e2",
+                    }
+              }
+              className="shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors"
             >
               {period}
             </button>
@@ -204,7 +317,8 @@ export const CategoryBreakdownFlow = ({
 
       <div
         key={loading ? "loading" : selectedPeriod}
-        className="h-[400px] rounded-2xl overflow-hidden border border-slate-200"
+        className="h-[420px] overflow-hidden"
+        style={{ border: "1px solid #e2e2e2", borderRadius: 8 }}
         aria-label={`${primaryLabel} data breakdown`}
       >
         <ReactFlow
@@ -220,13 +334,18 @@ export const CategoryBreakdownFlow = ({
           panOnDrag={false}
           zoomOnScroll={false}
           zoomOnPinch={false}
-          style={{ background: "#f8fafc" }}
+          colorMode="light"
+          style={{ background: "#fafafa" }}
         >
           <Background
-            variant={BackgroundVariant.Lines}
-            gap={32}
+            variant={BackgroundVariant.Dots}
+            gap={20}
             size={1}
-            color="#e2e8f0"
+            color="#c8c8c8"
+          />
+          <FlowController
+            selectedNodeId={selectedNodeId}
+            detail={selectedDimension?.detail}
           />
         </ReactFlow>
       </div>

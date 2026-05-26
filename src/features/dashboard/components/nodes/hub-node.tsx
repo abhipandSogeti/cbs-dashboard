@@ -4,70 +4,41 @@ type HubNodeData = { label: string };
 type HubNodeType = Node<HubNodeData, "hub">;
 
 export const HubNode = ({ data }: NodeProps<HubNodeType>) => (
-  <div className="relative flex flex-col items-center justify-center w-40 h-40 rounded-full">
-    {/* Outer orbit rings */}
+  <div
+    className="relative flex flex-col items-center justify-center w-36 h-36 rounded-full"
+    style={{
+      background: "#fff",
+      border: "2px solid #ff0071",
+      boxShadow:
+        "0 0 0 6px rgba(255,0,113,0.08), 0 4px 20px rgba(255,0,113,0.15)",
+      fontFamily: "Inter, system-ui, sans-serif",
+    }}
+  >
+    {/* Outer ping ring */}
     <span
-      className="absolute rounded-full border border-teal-400/20"
+      className="absolute rounded-full"
       style={{
-        inset: "-20px",
+        inset: -14,
+        border: "1px solid rgba(255,0,113,0.18)",
+        borderRadius: "50%",
         animation: "orbit-pulse 3s ease-in-out infinite",
       }}
     />
     <span
-      className="absolute rounded-full border border-teal-400/15"
+      className="absolute rounded-full"
       style={{
-        inset: "-36px",
+        inset: -26,
+        border: "1px solid rgba(255,0,113,0.10)",
+        borderRadius: "50%",
         animation: "orbit-pulse 3s ease-in-out 1s infinite",
       }}
     />
-    <span
-      className="absolute rounded-full border border-teal-400/10"
-      style={{
-        inset: "-52px",
-        animation: "orbit-pulse 3s ease-in-out 2s infinite",
-      }}
-    />
 
-    {/* Glow backdrop */}
-    <span
-      className="absolute inset-0 rounded-full"
-      style={{
-        background:
-          "radial-gradient(circle, rgba(13,148,136,0.4) 0%, rgba(13,148,136,0.1) 60%, transparent 100%)",
-        filter: "blur(12px)",
-      }}
-    />
-
-    {/* Main circle */}
-    <span
-      className="absolute inset-0 rounded-full"
-      style={{
-        background: "radial-gradient(circle at 35% 35%, #0f766e, #042f2e)",
-        boxShadow:
-          "0 0 30px rgba(13,148,136,0.6), 0 0 60px rgba(13,148,136,0.3), inset 0 1px 0 rgba(255,255,255,0.1)",
-        border: "1px solid rgba(20,184,166,0.4)",
-      }}
-    />
-
-    {/* Ping rings */}
-    <span className="absolute inset-3 rounded-full bg-teal-500/20 animate-ping" />
-    <span
-      className="absolute inset-5 rounded-full bg-teal-400/15 animate-ping"
-      style={{ animationDelay: "0.7s" }}
-    />
-
-    {/* Content */}
-    <span
-      className="relative z-10 flex h-11 w-11 items-center justify-center rounded-full text-teal-300 text-xs font-bold"
-      style={{
-        background: "rgba(255,255,255,0.08)",
-        border: "1px solid rgba(255,255,255,0.15)",
-        backdropFilter: "blur(4px)",
-      }}
+    <span className="text-3xl leading-none">🌍</span>
+    <p
+      className="mt-1 text-xs font-semibold text-center px-2"
+      style={{ color: "#ff0071" }}
     >
-      🌍
-    </span>
-    <p className="relative z-10 mt-2 text-xs font-semibold text-teal-100 text-center px-2 leading-tight tracking-wide">
       {data.label}
     </p>
 
