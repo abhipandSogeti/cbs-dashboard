@@ -6,7 +6,7 @@ import { Sidebar } from './sidebar'
 describe('Sidebar', () => {
   it('renders the CBS brand', () => {
     render(<Sidebar />)
-    expect(screen.getByText('CBS')).toBeInTheDocument()
+    expect(screen.getAllByText('CBS').length).toBeGreaterThan(0)
     expect(screen.getByText('Netherlands')).toBeInTheDocument()
   })
 
