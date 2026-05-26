@@ -40,11 +40,11 @@ export const EnergyView = () => {
   );
 
   const stats: Stat[] =
-    firstRow !== undefined
+    activeRow !== undefined
       ? [
           {
             label: "Total Supply",
-            value: `${(firstRow.TotaalAanbodTPES_1 ?? 0).toLocaleString("nl-NL")} PJ`,
+            value: `${(activeRow.TotaalAanbodTPES_1 ?? 0).toLocaleString("nl-NL")} PJ`,
             sub: "TPES",
             icon: <Zap className="h-5 w-5" />,
             sparkData: rows.slice(0, 8).map((r) => r.TotaalAanbodTPES_1 ?? 0),
