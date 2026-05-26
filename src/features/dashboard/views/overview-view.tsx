@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { Globe, Map, Building2, Sun } from "lucide-react";
 import { ViewHeader } from "@/shared/components/view-header";
 import { CbsOverviewFlow } from "../components/flows/cbs-overview-flow";
+import { InteractiveDemoFlow } from "../components/flows/interactive-demo-flow";
 import { useAllCountries, formatPop } from "../hooks/use-countries";
 
 export const OverviewView = () => {
@@ -52,6 +53,10 @@ export const OverviewView = () => {
         Click a region to explore countries and sub-regions.
       </p>
       <CbsOverviewFlow categories={categories} loading={isLoading} />
+      <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 -mb-2">
+        Interactive Demo
+      </p>
+      <InteractiveDemoFlow />
     </div>
   );
 };
