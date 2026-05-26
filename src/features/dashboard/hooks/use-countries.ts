@@ -2,7 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 import { CountrySchema } from "../types/country.schema";
 
-const FIELDS = "cca3,name,population,area,subregion,region,borders";
+const FIELDS =
+  "cca3,name,population,area,subregion,region,borders,flag,capital";
 
 export const useCountriesByRegion = (region: string) =>
   useQuery({

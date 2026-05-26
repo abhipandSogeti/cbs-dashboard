@@ -8,6 +8,8 @@ export const CountrySchema = z.object({
   subregion: z.string().optional().default(""),
   region: z.string(),
   borders: z.array(z.string()).optional().default([]),
+  flag: z.string().optional().default("🏳"),
+  capital: z.array(z.string()).optional().default([]),
 });
 
 export type Country = z.infer<typeof CountrySchema>;
