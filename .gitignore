@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Compiled JS artifacts (TypeScript project — .js files in src/ are stale tsc output)
+src/**/*.js
+src/**/*.js.map
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
