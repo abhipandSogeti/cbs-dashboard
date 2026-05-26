@@ -1,56 +1,94 @@
-import { Briefcase } from 'lucide-react'
-import { useDashboardStore } from '../store/dashboard.store'
-import { useLabour } from '../hooks/use-labour'
-import { labourConfig } from '../config/labour.config'
-import { StatsBar } from '../components/stats-bar'
-import { DataTable } from '../components/data-table'
-import { ViewHeader } from '@/shared/components/view-header'
-import type { Stat } from '../components/stats-bar'
-import type { TableState } from '../store/dashboard.store'
-import type { PaginationState, SortingState, VisibilityState } from '@tanstack/react-table'
+import { useCallback, useMemo, useState } from "react";
+import { Briefcase } from "lucide-react";
+import { useDashboardStore } from "../store/dashboard.store";
+import { useLabour } from "../hooks/use-labour";
+import { StatsBar } from "../components/stats-bar";
+import { CategoryBreakdownFlow } from "../components/flows/category-breakdown-flow";
+import { ViewHeader } from "@/shared/components/view-header";
+import type { Stat } from "../components/stats-bar";
+import type { DimensionItem } from "../components/flows/category-breakdown-flow";
 
 export const LabourView = () => {
-  const { tableStates, setTableState } = useDashboardStore()
-  const state = tableStates.labour
-  const { data, isLoading, error } = useLabour(state)
+  const { tableStates } = useDashboardStore();
+  const state = tableStates.labour;
+  const { data, isLoading, error } = useLabour(state);
 
-  const handleChange = (partial: Partial<TableState>) =>
-    setTableState('labour', partial)
+  const rows = data?.rows ?? [];
+  const firstRow = rows[0];
 
-  const rows = data?.rows ?? []
-  const firstRow = rows[0]
+  const periods = useMemo(
+    () =>
+      [...new Set(rows.map((r) => r.Perioden))].sort((a, b) =>
+        b.localeCompare(a),
+      ),
+    [rows],
+  );
 
-  const stats: Stat[] = firstRow !== undefined
-    ? [
-        {
-          label: 'Labour Force',
-          value: `${(firstRow.NietSeizoengecorrigeerd_1 ?? 0).toLocaleString('nl-NL')}k`,
-          sub: 'x1000 persons',
-          icon: <Briefcase className="h-5 w-5" />,
-          sparkData: rows.slice(0, 8).map((r) => r.NietSeizoengecorrigeerd_1 ?? 0),
-        },
-      ]
-    : []
+  const [selectedPeriod, setSelectedPeriod] = useState<string>("");
+  const activePeriod =
+    selectedPeriod !== "" ? selectedPeriod : (periods[0] ?? "");
+  const activeRow = rows.find((r) => r.Perioden === activePeriod) ?? firstRow;
+
+  const handlePeriodChange = useCallback(
+    (period: string) => setSelectedPeriod(period),
+    [],
+  );
+
+  const stats: Stat[] =
+    firstRow !== undefined
+      ? [
+          {
+            label: "Labour Force",
+            value: `${(firstRow.NietSeizoengecorrigeerd_1 ?? 0).toLocaleString("nl-NL")}k`,
+            sub: "x1000 persons",
+            icon: <Briefcase className="h-5 w-5" />,
+            sparkData: rows
+              .slice(0, 8)
+              .map((r) => r.NietSeizoengecorrigeerd_1 ?? 0),
+          },
+        ]
+      : [];
+
+  const dimensions: DimensionItem[] =
+    activeRow !== undefined
+      ? [
+          {
+            id: "labour-force",
+            label: "Labour Force",
+            value: `${(activeRow.NietSeizoengecorrigeerd_1 ?? 0).toLocaleString("nl-NL")}k`,
+            isNegative: false,
+          },
+          {
+            id: "seasonally-adjusted",
+            label: "Seasonally Adjusted",
+            value: `${(activeRow.Seizoengecorrigeerd_2 ?? 0).toLocaleString("nl-NL")}k`,
+            isNegative: false,
+          },
+        ]
+      : [];
 
   return (
     <div className="flex flex-col gap-6">
-      <ViewHeader title="Labour" updatedAt="May 2026" />
+      <ViewHeader title="Labour Market" updatedAt="May 2026" />
       <StatsBar stats={stats} loading={isLoading} />
-      <DataTable
-        data={rows}
-        columns={labourConfig.columns}
-        totalRows={data?.total ?? 0}
+      <CategoryBreakdownFlow
+        periods={periods}
+        selectedPeriod={activePeriod}
+        onPeriodChange={handlePeriodChange}
+        primaryLabel="Labour Force"
+        primaryValue={
+          activeRow !== undefined
+            ? `${(activeRow.NietSeizoengecorrigeerd_1 ?? 0).toLocaleString("nl-NL")}k`
+            : "—"
+        }
+        primaryUnit="x1000 persons"
+        sparkData={rows
+          .slice(0, 8)
+          .map((r) => r.NietSeizoengecorrigeerd_1 ?? 0)}
+        dimensions={dimensions}
         loading={isLoading}
         error={error ?? null}
-        pagination={state.pagination}
-        sorting={state.sorting}
-        columnVisibility={state.columnVisibility}
-        globalFilter={state.globalFilter}
-        onPaginationChange={(u) => handleChange({ pagination: typeof u === 'function' ? u(state.pagination) : u as PaginationState })}
-        onSortingChange={(u) => handleChange({ sorting: typeof u === 'function' ? u(state.sorting) : u as SortingState })}
-        onColumnVisibilityChange={(u) => handleChange({ columnVisibility: typeof u === 'function' ? u(state.columnVisibility) : u as VisibilityState })}
-        onGlobalFilterChange={(globalFilter) => handleChange({ globalFilter })}
       />
     </div>
-  )
-}
+  );
+};
