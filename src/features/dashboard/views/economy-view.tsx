@@ -1,8 +1,11 @@
+import { TrendingUp, BarChart3 } from 'lucide-react'
 import { useDashboardStore } from '../store/dashboard.store'
 import { useEconomy } from '../hooks/use-economy'
 import { economyConfig } from '../config/economy.config'
 import { StatsBar } from '../components/stats-bar'
 import { DataTable } from '../components/data-table'
+import { ViewHeader } from '@/shared/components/view-header'
+import type { Stat } from '../components/stats-bar'
 import type { TableState } from '../store/dashboard.store'
 import type { PaginationState, SortingState, VisibilityState } from '@tanstack/react-table'
 
@@ -14,20 +17,32 @@ export const EconomyView = () => {
   const handleChange = (partial: Partial<TableState>) =>
     setTableState('economy', partial)
 
-  const firstRow = data?.rows[0]
-  const stats = firstRow !== undefined
+  const rows = data?.rows ?? []
+  const firstRow = rows[0]
+
+  const stats: Stat[] = firstRow !== undefined
     ? [
-        { label: 'Volume Change', value: `${firstRow.Volumemutaties_1?.toFixed(1) ?? '-'}%` },
-        { label: 'Index (2000=100)', value: firstRow.Indexcijfers2000100_3?.toFixed(1) ?? '-' },
+        {
+          label: 'Volume Change',
+          value: `${firstRow.Volumemutaties_1?.toFixed(1) ?? '-'}%`,
+          icon: <TrendingUp className="h-5 w-5" />,
+          sparkData: rows.slice(0, 8).map((r) => r.Volumemutaties_1 ?? 0),
+        },
+        {
+          label: 'Index (2000=100)',
+          value: firstRow.Indexcijfers2000100_3?.toFixed(1) ?? '-',
+          icon: <BarChart3 className="h-5 w-5" />,
+          sparkData: rows.slice(0, 8).map((r) => r.Indexcijfers2000100_3 ?? 0),
+        },
       ]
     : []
 
   return (
-    <div className="flex flex-col gap-6 p-6">
-      <h1 className="text-lg font-semibold text-neutral-900">Economy</h1>
+    <div className="flex flex-col gap-6">
+      <ViewHeader title="Economy" updatedAt="May 2026" />
       <StatsBar stats={stats} loading={isLoading} />
       <DataTable
-        data={data?.rows ?? []}
+        data={rows}
         columns={economyConfig.columns}
         totalRows={data?.total ?? 0}
         loading={isLoading}

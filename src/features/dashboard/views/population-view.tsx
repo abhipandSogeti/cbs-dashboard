@@ -1,15 +1,13 @@
+import { Users, TrendingUp } from 'lucide-react'
 import { useDashboardStore } from '../store/dashboard.store'
 import { usePopulation } from '../hooks/use-population'
 import { populationConfig } from '../config/population.config'
 import { StatsBar } from '../components/stats-bar'
 import { DataTable } from '../components/data-table'
+import { ViewHeader } from '@/shared/components/view-header'
+import type { Stat } from '../components/stats-bar'
 import type { TableState } from '../store/dashboard.store'
 import type { PaginationState, SortingState, VisibilityState } from '@tanstack/react-table'
-
-const buildStats = (population: number, growth: number) => [
-  { label: 'Total Population', value: population.toLocaleString('nl-NL'), sub: 'persons' },
-  { label: 'Annual Growth', value: growth.toLocaleString('nl-NL'), sub: 'persons' },
-]
 
 export const PopulationView = () => {
   const { tableStates, setTableState } = useDashboardStore()
@@ -19,20 +17,34 @@ export const PopulationView = () => {
   const handleChange = (partial: Partial<TableState>) =>
     setTableState('population', partial)
 
-  const firstRow = data?.rows[0]
-  const stats = firstRow !== undefined
-    ? buildStats(
-        firstRow.TotaleBevolking_1 ?? 0,
-        firstRow.TotaleBevolkingsgroei_67 ?? 0
-      )
+  const rows = data?.rows ?? []
+  const firstRow = rows[0]
+
+  const stats: Stat[] = firstRow !== undefined
+    ? [
+        {
+          label: 'Total Population',
+          value: (firstRow.TotaleBevolking_1 ?? 0).toLocaleString('nl-NL'),
+          sub: 'persons',
+          icon: <Users className="h-5 w-5" />,
+          sparkData: rows.slice(0, 8).map((r) => r.TotaleBevolking_1 ?? 0),
+        },
+        {
+          label: 'Annual Growth',
+          value: (firstRow.TotaleBevolkingsgroei_67 ?? 0).toLocaleString('nl-NL'),
+          sub: 'persons',
+          icon: <TrendingUp className="h-5 w-5" />,
+          sparkData: rows.slice(0, 8).map((r) => r.TotaleBevolkingsgroei_67 ?? 0),
+        },
+      ]
     : []
 
   return (
-    <div className="flex flex-col gap-6 p-6">
-      <h1 className="text-lg font-semibold text-neutral-900">Population</h1>
+    <div className="flex flex-col gap-6">
+      <ViewHeader title="Population" updatedAt="May 2026" />
       <StatsBar stats={stats} loading={isLoading} />
       <DataTable
-        data={data?.rows ?? []}
+        data={rows}
         columns={populationConfig.columns}
         totalRows={data?.total ?? 0}
         loading={isLoading}
