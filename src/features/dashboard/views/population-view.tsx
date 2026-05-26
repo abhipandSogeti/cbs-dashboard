@@ -1,3 +1,4 @@
+import { useCallback } from 'react'
 import { Users, TrendingUp } from 'lucide-react'
 import { useDashboardStore } from '../store/dashboard.store'
 import { usePopulation } from '../hooks/use-population'
@@ -14,8 +15,10 @@ export const PopulationView = () => {
   const state = tableStates.population
   const { data, isLoading, error } = usePopulation(state)
 
-  const handleChange = (partial: Partial<TableState>) =>
-    setTableState('population', partial)
+  const handleChange = useCallback(
+    (partial: Partial<TableState>) => setTableState('population', partial),
+    [setTableState],
+  )
 
   const rows = data?.rows ?? []
   const firstRow = rows[0]
@@ -39,6 +42,23 @@ export const PopulationView = () => {
       ]
     : []
 
+  const onPaginationChange = useCallback<(u: PaginationState | ((prev: PaginationState) => PaginationState)) => void>(
+    (u) => handleChange({ pagination: typeof u === 'function' ? u(state.pagination) : u }),
+    [handleChange, state.pagination],
+  )
+  const onSortingChange = useCallback<(u: SortingState | ((prev: SortingState) => SortingState)) => void>(
+    (u) => handleChange({ sorting: typeof u === 'function' ? u(state.sorting) : u }),
+    [handleChange, state.sorting],
+  )
+  const onColumnVisibilityChange = useCallback<(u: VisibilityState | ((prev: VisibilityState) => VisibilityState)) => void>(
+    (u) => handleChange({ columnVisibility: typeof u === 'function' ? u(state.columnVisibility) : u }),
+    [handleChange, state.columnVisibility],
+  )
+  const onGlobalFilterChange = useCallback(
+    (globalFilter: string) => handleChange({ globalFilter }),
+    [handleChange],
+  )
+
   return (
     <div className="flex flex-col gap-6">
       <ViewHeader title="Population" updatedAt="May 2026" />
@@ -53,10 +73,10 @@ export const PopulationView = () => {
         sorting={state.sorting}
         columnVisibility={state.columnVisibility}
         globalFilter={state.globalFilter}
-        onPaginationChange={(u) => handleChange({ pagination: typeof u === 'function' ? u(state.pagination) : u as PaginationState })}
-        onSortingChange={(u) => handleChange({ sorting: typeof u === 'function' ? u(state.sorting) : u as SortingState })}
-        onColumnVisibilityChange={(u) => handleChange({ columnVisibility: typeof u === 'function' ? u(state.columnVisibility) : u as VisibilityState })}
-        onGlobalFilterChange={(globalFilter) => handleChange({ globalFilter })}
+        onPaginationChange={onPaginationChange}
+        onSortingChange={onSortingChange}
+        onColumnVisibilityChange={onColumnVisibilityChange}
+        onGlobalFilterChange={onGlobalFilterChange}
       />
     </div>
   )

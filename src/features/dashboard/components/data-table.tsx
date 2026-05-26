@@ -104,6 +104,13 @@ export const DataTable = <T,>({
                   <th
                     key={header.id}
                     onClick={header.column.getToggleSortingHandler()}
+                    aria-sort={
+                      header.column.getIsSorted() === 'asc'
+                        ? 'ascending'
+                        : header.column.getIsSorted() === 'desc'
+                          ? 'descending'
+                          : 'none'
+                    }
                     className="cursor-pointer select-none px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500"
                   >
                     {flexRender(header.column.columnDef.header, header.getContext())}

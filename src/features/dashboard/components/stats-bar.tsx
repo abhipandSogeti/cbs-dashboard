@@ -24,7 +24,9 @@ const TrendBadge = ({ trend }: { trend: number }) => {
           : 'rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-600'
       }
     >
-      {isUp ? '↑' : '↓'} {Math.abs(trend).toFixed(1)}%
+      <span aria-label={`${isUp ? 'Up' : 'Down'} ${Math.abs(trend).toFixed(1)} percent`}>
+        <span aria-hidden="true">{isUp ? '↑' : '↓'}</span> {Math.abs(trend).toFixed(1)}%
+      </span>
     </span>
   )
 }

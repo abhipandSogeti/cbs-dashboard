@@ -30,11 +30,12 @@ export const Sidebar = () => {
       <p className="mb-1 px-3 text-xs font-medium uppercase tracking-widest text-slate-400">
         DATA
       </p>
-      <nav className="flex flex-col gap-0.5">
+      <nav aria-label="Dashboard navigation" className="flex flex-col gap-0.5">
         {views.map(({ id, label, Icon }) => (
           <button
             key={id}
             onClick={() => setActiveView(id)}
+            aria-current={activeView === id ? 'page' : undefined}
             className={clsx(
               'flex items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-colors',
               activeView === id
