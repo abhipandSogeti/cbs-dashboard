@@ -1,17 +1,24 @@
-import { clsx } from 'clsx'
-import { Users, Briefcase, TrendingUp, Zap } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
-import { useDashboardStore, type ViewId } from '../store/dashboard.store'
+import { clsx } from "clsx";
+import {
+  LayoutDashboard,
+  Users,
+  Briefcase,
+  TrendingUp,
+  Zap,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { useDashboardStore, type ViewId } from "../store/dashboard.store";
 
 const views: { id: ViewId; label: string; Icon: LucideIcon }[] = [
-  { id: 'population', label: 'Population', Icon: Users },
-  { id: 'labour',     label: 'Labour',     Icon: Briefcase },
-  { id: 'economy',    label: 'Economy',    Icon: TrendingUp },
-  { id: 'energy',     label: 'Energy',     Icon: Zap },
-]
+  { id: "overview", label: "Overview", Icon: LayoutDashboard },
+  { id: "population", label: "Population", Icon: Users },
+  { id: "labour", label: "Labour", Icon: Briefcase },
+  { id: "economy", label: "Economy", Icon: TrendingUp },
+  { id: "energy", label: "Energy", Icon: Zap },
+];
 
 export const Sidebar = () => {
-  const { activeView, setActiveView } = useDashboardStore()
+  const { activeView, setActiveView } = useDashboardStore();
 
   return (
     <aside className="flex w-60 shrink-0 flex-col border-r border-slate-200 bg-white px-3 py-6">
@@ -35,12 +42,12 @@ export const Sidebar = () => {
           <button
             key={id}
             onClick={() => setActiveView(id)}
-            aria-current={activeView === id ? 'page' : undefined}
+            aria-current={activeView === id ? "page" : undefined}
             className={clsx(
-              'flex items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-colors',
+              "flex items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-colors",
               activeView === id
-                ? 'border-l-2 border-teal-600 bg-teal-50 font-medium text-teal-700'
-                : 'border-l-2 border-transparent text-slate-600 hover:bg-slate-50'
+                ? "border-l-2 border-teal-600 bg-teal-50 font-medium text-teal-700"
+                : "border-l-2 border-transparent text-slate-600 hover:bg-slate-50",
             )}
           >
             <Icon className="h-4 w-4 shrink-0" />
@@ -49,5 +56,5 @@ export const Sidebar = () => {
         ))}
       </nav>
     </aside>
-  )
-}
+  );
+};

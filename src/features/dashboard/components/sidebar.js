@@ -1,0 +1,75 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { clsx } from "clsx";
+import {
+  LayoutDashboard,
+  Users,
+  Briefcase,
+  TrendingUp,
+  Zap,
+} from "lucide-react";
+import { useDashboardStore } from "../store/dashboard.store";
+const views = [
+  { id: "overview", label: "Overview", Icon: LayoutDashboard },
+  { id: "population", label: "Population", Icon: Users },
+  { id: "labour", label: "Labour", Icon: Briefcase },
+  { id: "economy", label: "Economy", Icon: TrendingUp },
+  { id: "energy", label: "Energy", Icon: Zap },
+];
+export const Sidebar = () => {
+  const { activeView, setActiveView } = useDashboardStore();
+  return _jsxs("aside", {
+    className:
+      "flex w-60 shrink-0 flex-col border-r border-slate-200 bg-white px-3 py-6",
+    children: [
+      _jsxs("div", {
+        className: "mb-6 flex items-center gap-2 px-3",
+        children: [
+          _jsx("span", {
+            className:
+              "flex h-7 w-7 items-center justify-center rounded-lg bg-teal-600 text-xs font-bold text-white",
+            children: "CBS",
+          }),
+          _jsxs("div", {
+            className: "flex flex-col leading-tight",
+            children: [
+              _jsx("span", {
+                className: "text-sm font-bold text-slate-900",
+                children: "CBS",
+              }),
+              _jsx("span", {
+                className: "text-xs text-slate-400",
+                children: "Netherlands",
+              }),
+            ],
+          }),
+        ],
+      }),
+      _jsx("p", {
+        className:
+          "mb-1 px-3 text-xs font-medium uppercase tracking-widest text-slate-400",
+        children: "DATA",
+      }),
+      _jsx("nav", {
+        "aria-label": "Dashboard navigation",
+        className: "flex flex-col gap-0.5",
+        children: views.map(({ id, label, Icon }) =>
+          _jsxs(
+            "button",
+            {
+              onClick: () => setActiveView(id),
+              "aria-current": activeView === id ? "page" : undefined,
+              className: clsx(
+                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-colors",
+                activeView === id
+                  ? "border-l-2 border-teal-600 bg-teal-50 font-medium text-teal-700"
+                  : "border-l-2 border-transparent text-slate-600 hover:bg-slate-50",
+              ),
+              children: [_jsx(Icon, { className: "h-4 w-4 shrink-0" }), label],
+            },
+            id,
+          ),
+        ),
+      }),
+    ],
+  });
+};
