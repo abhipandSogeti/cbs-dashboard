@@ -1,29 +1,29 @@
-# CBS Netherlands Dashboard
+# CBS Dashboard
 
-A live statistics dashboard powered by the [CBS OData REST API](https://www.cbs.nl/en-gb/our-services/open-data/statline-as-open-data). Four topic views — Population, Labour, Economy, Energy — each with a KPI stats bar and a fully interactive data table.
+An interactive world-data dashboard powered by the [REST Countries API](https://restcountries.com) and visualised entirely with [React Flow](https://reactflow.dev). Explore regions, countries, and live metrics through node-based canvas UIs.
 
 ## Features
 
-- Live data from CBS (Statistics Netherlands) — no backend, no API key required
-- Sortable, paginated data tables with server-side paging via OData
-- Client-side text search within the current page
-- Column visibility toggle per view
-- CSV export of visible columns
-- Table state (sort, page, search, columns) preserved when switching views
+- **Overview canvas** — hub-and-spoke React Flow graph with floating, draggable region nodes
+- **Interactive Demo** — live wired flow: change Region / Metric / Top-N inputs and watch proportional country bubbles update in real time with continuous drift animation
+- **Category breakdown flows** — per-region country nodes with dashed edges, pink selection state, and a `NodeToolbar` country detail popup (flag, capital, area, population, borders)
+- **NodeToolbar** — contextual overlays on hover/select: "Open view" CTA on overview nodes, country stats on breakdown nodes
+- **Stats bar** — KPI cards per region (total population, largest country, most borders, avg area)
+- Live data from `restcountries.com` — no API key required, 24 h client-side cache via TanStack Query
 
 ## Stack
 
-| Layer | Library |
-|-------|---------|
-| UI | React 19 |
-| Language | TypeScript 6 (strict) |
-| Build | Vite 8 |
-| Styles | Tailwind v4 (CSS-first) |
-| Server state | TanStack Query v5 |
-| Table | TanStack Table v8 |
-| Client state | Zustand v5 |
-| Validation | Zod v4 |
-| Fetch | Native `fetch` — no axios |
+| Layer           | Library                        |
+| --------------- | ------------------------------ |
+| UI              | React 18 + TypeScript (strict) |
+| Visualisation   | React Flow (`@xyflow/react`)   |
+| Styling         | Tailwind CSS v3                |
+| Icons           | Lucide React                   |
+| Server state    | TanStack Query v5              |
+| Client state    | Zustand v5                     |
+| Validation      | Zod v4                         |
+| Build           | Vite 8                         |
+| Package manager | pnpm                           |
 
 ## Getting Started
 
@@ -38,94 +38,78 @@ App runs at `http://localhost:5173`.
 pnpm build      # production build
 pnpm preview    # preview production build locally
 pnpm test       # run tests (Vitest)
-pnpm coverage   # test coverage report
 ```
 
-## CBS Datasets
+## Data Source
 
-All data is fetched live from the CBS OData endpoint:
+All data is fetched live from the REST Countries public API — no backend, no API key:
 
 ```
-https://opendata.cbs.nl/ODataFeed/odata/{datasetId}/TypedDataSet
+https://restcountries.com/v3.1/region/{region}?fields=cca3,name,population,area,subregion,region,borders,flag,capital
+https://restcountries.com/v3.1/all?fields=...
 ```
 
-| View | Dataset ID | Description |
-|------|-----------|-------------|
-| Population | `37296ned` | Population by region and period |
-| Labour | `80590ned` | Labour force participation |
-| Economy | `70076ned` | Goods and services volume changes |
-| Energy | `83140ned` | Energy balance by source |
-
-Row counts are fetched separately via `/{datasetId}/TypedDataSet/$count`.
-
-> **Note:** The `ODataFeed` endpoint is used instead of `ODataApi`. The `ODataApi` endpoint does not support the `$skip` query parameter required for pagination.
+| View     | Region filter | Shows                            |
+| -------- | ------------- | -------------------------------- |
+| Overview | all           | Hub-and-spoke with region totals |
+| Europe   | `europe`      | Subregion breakdown              |
+| Americas | `americas`    | Subregion breakdown              |
+| Asia     | `asia`        | Subregion breakdown              |
+| Africa   | `africa`      | Subregion breakdown              |
 
 ## Project Structure
 
 ```
 src/
-  app/
-    router.tsx          # View switching — renders active view from Zustand
-    query-client.ts     # TanStack Query client (staleTime, retry config)
-    main.tsx            # App entry — QueryClientProvider + App
-
   features/
     dashboard/
       components/
-        dashboard-layout.tsx   # Sidebar + main content shell
-        sidebar.tsx            # Left nav, 4 view links
-        stats-bar.tsx          # KPI cards row
-        data-table.tsx         # Generic TanStack Table wrapper
-        table-toolbar.tsx      # Search + column toggle + CSV export
-        table-pagination.tsx   # Page size selector + prev/next
+        flows/
+          cbs-overview-flow.tsx        # Hub-and-spoke overview canvas
+          category-breakdown-flow.tsx  # Per-region country breakdown canvas
+          interactive-demo-flow.tsx    # Live-wired demo (Region/Metric/TopN → bubbles)
+        nodes/
+          hub-node.tsx          # Central globe node with pulse rings
+          category-node.tsx     # Region card with NodeToolbar + float animation
+          dimension-node.tsx    # Country node with NodeToolbar detail popup
+          primary-stat-node.tsx # Top KPI node with sparkline
+        sidebar.tsx
+        stats-bar.tsx
       views/
-        population-view.tsx
-        labour-view.tsx
-        economy-view.tsx
-        energy-view.tsx
+        overview-view.tsx
+        population-view.tsx   # Europe
+        labour-view.tsx       # Americas
+        economy-view.tsx      # Asia
+        energy-view.tsx       # Africa
       hooks/
-        use-population.ts      # useQuery for CBS dataset + count
-        use-labour.ts
-        use-economy.ts
-        use-energy.ts
-      config/
-        population.config.ts   # Column definitions + dataset ID
-        labour.config.ts
-        economy.config.ts
-        energy.config.ts
-      store/
-        dashboard.store.ts     # Active view + per-view table state (Zustand)
+        use-countries.ts      # useCountriesByRegion, useAllCountries, formatPop
       types/
-        population.schema.ts   # Zod schema + inferred TS type
-        labour.schema.ts
-        economy.schema.ts
-        energy.schema.ts
-
+        country.schema.ts     # Zod schema — Country type
+      store/
+        dashboard.store.ts    # Active view (Zustand)
   shared/
-    lib/
-      cbs-fetch.ts             # Typed fetch wrapper for CBS OData
     components/
-      card.tsx
-      badge.tsx
-    types/
-      api.ts                   # CbsResponse<T>, CbsParams
+      sparkline.tsx
+      stats-bar.tsx
+      view-header.tsx
+  index.css                   # Keyframes: node-float, shape-drift, orbit-pulse, particle-float
 ```
 
-## Data Flow
+## React Flow Patterns Used
 
-```
-Zustand tableState → queryKey → React Query → CBS OData API
-                                             → Zod parses response
-                                             → TanStack Table renders
-       ^                                                    |
-       └──────────── user sorts / pages / searches ────────┘
-```
+- **Custom node types** — all nodes are fully custom React components
+- **NodeToolbar** — contextual action overlays on select / drag
+- **`useReactFlow` + inner component** — `fitView` camera animation to selected node
+- **`Panel`** — bottom-centre detail card with slide-up entrance animation
+- **`colorMode="light"`** — React Flow light theme tokens
+- **`fitView` re-trigger** — `key` prop on canvas wrapper forces remount when period changes
+- **Controlled node data** — parent state flows into node `data`, handlers passed as callbacks
 
-- **Sorting and pagination** are server-side — each change re-fetches from CBS with new `$orderby` / `$top` / `$skip` params.
-- **Text search** is client-side against the current page — CBS OData does not support free-text search across all columns. A note in the toolbar makes this visible to the user.
+## Animation
 
-## Architecture Decisions
-
-See [`docs/adr/`](docs/adr/) for recorded decisions.
-
-- [ADR-0001](docs/adr/0001-tanstack-query-and-table.md) — Use TanStack Query for server state and TanStack Table for table rendering
+| Keyframe         | Used on                   | Effect                                   |
+| ---------------- | ------------------------- | ---------------------------------------- |
+| `node-float`     | Category nodes (overview) | Gentle bob + tilt, staggered per node    |
+| `shape-drift`    | Demo output bubbles       | Continuous drift + rotate, all staggered |
+| `orbit-pulse`    | Hub node rings            | Slow scale pulse                         |
+| `particle-float` | (legacy)                  | Particle overlay                         |
