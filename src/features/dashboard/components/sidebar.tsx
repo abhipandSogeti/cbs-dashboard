@@ -1,20 +1,14 @@
 import { clsx } from "clsx";
-import {
-  LayoutDashboard,
-  Users,
-  Briefcase,
-  TrendingUp,
-  Zap,
-} from "lucide-react";
+import { LayoutDashboard, Globe, Map, Building2, Sun } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useDashboardStore, type ViewId } from "../store/dashboard.store";
 
 const views: { id: ViewId; label: string; Icon: LucideIcon }[] = [
   { id: "overview", label: "Overview", Icon: LayoutDashboard },
-  { id: "population", label: "Population", Icon: Users },
-  { id: "labour", label: "Labour", Icon: Briefcase },
-  { id: "economy", label: "Economy", Icon: TrendingUp },
-  { id: "energy", label: "Energy", Icon: Zap },
+  { id: "population", label: "Europe", Icon: Globe },
+  { id: "labour", label: "Americas", Icon: Map },
+  { id: "economy", label: "Asia", Icon: Building2 },
+  { id: "energy", label: "Africa", Icon: Sun },
 ];
 
 export const Sidebar = () => {
@@ -25,17 +19,17 @@ export const Sidebar = () => {
       {/* Brand */}
       <div className="mb-6 flex items-center gap-2 px-3">
         <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-teal-600 text-xs font-bold text-white">
-          CBS
+          🌍
         </span>
         <div className="flex flex-col leading-tight">
-          <span className="text-sm font-bold text-slate-900">CBS</span>
-          <span className="text-xs text-slate-400">Netherlands</span>
+          <span className="text-sm font-bold text-slate-900">World</span>
+          <span className="text-xs text-slate-400">Population Explorer</span>
         </div>
       </div>
 
       {/* Nav section */}
       <p className="mb-1 px-3 text-xs font-medium uppercase tracking-widest text-slate-400">
-        DATA
+        REGIONS
       </p>
       <nav aria-label="Dashboard navigation" className="flex flex-col gap-0.5">
         {views.map(({ id, label, Icon }) => (

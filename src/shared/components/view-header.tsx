@@ -1,12 +1,12 @@
 type ViewHeaderProps = {
-  title: string
-  subtitle?: string
-  updatedAt?: string
-}
+  title: string;
+  subtitle?: string;
+  updatedAt?: string;
+};
 
 export const ViewHeader = ({
   title,
-  subtitle = 'Central Bureau of Statistics · Netherlands',
+  subtitle = "REST Countries — Live Open Data",
   updatedAt,
 }: ViewHeaderProps) => (
   <div className="flex items-start justify-between mb-6">
@@ -15,7 +15,9 @@ export const ViewHeader = ({
       <p className="text-sm text-slate-400 mt-0.5">{subtitle}</p>
     </div>
     {updatedAt !== undefined && (
-      <span className="text-xs text-slate-400 mt-1">Last updated: {updatedAt}</span>
+      <span className="text-xs text-slate-400 mt-1">
+        Last updated: {updatedAt}
+      </span>
     )}
   </div>
-)
+);

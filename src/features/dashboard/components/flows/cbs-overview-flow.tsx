@@ -53,7 +53,7 @@ export const CbsOverviewFlow = ({
         id: "hub",
         type: "hub",
         position: HUB_POS,
-        data: { label: "CBS Netherlands" },
+        data: { label: "World" },
         selectable: false,
         draggable: false,
       },

@@ -1,89 +1,55 @@
 import { useMemo } from "react";
-import { Users, Briefcase, TrendingUp, Zap } from "lucide-react";
+import { Globe, Map, Building2, Sun } from "lucide-react";
 import { ViewHeader } from "@/shared/components/view-header";
 import { CbsOverviewFlow } from "../components/flows/cbs-overview-flow";
-import { usePopulation } from "../hooks/use-population";
-import { useLabour } from "../hooks/use-labour";
-import { useEconomy } from "../hooks/use-economy";
-import { useEnergy } from "../hooks/use-energy";
-import type { TableState } from "../store/dashboard.store";
-
-// Fetch just the most-recent row for each category (overview doesn't need history)
-const OVERVIEW_STATE: TableState = {
-  pagination: { pageIndex: 0, pageSize: 1 },
-  sorting: [],
-  columnVisibility: {},
-  globalFilter: "",
-};
+import { useAllCountries, formatPop } from "../hooks/use-countries";
 
 export const OverviewView = () => {
-  const population = usePopulation(OVERVIEW_STATE);
-  const labour = useLabour(OVERVIEW_STATE);
-  const economy = useEconomy(OVERVIEW_STATE);
-  const energy = useEnergy(OVERVIEW_STATE);
+  const { data: countries = [], isLoading } = useAllCountries();
 
-  const isLoading =
-    population.isLoading ||
-    labour.isLoading ||
-    economy.isLoading ||
-    energy.isLoading;
+  const categories = useMemo(() => {
+    const sum = (region: string) =>
+      countries
+        .filter((c) => c.region.toLowerCase() === region)
+        .reduce((s, c) => s + c.population, 0);
 
-  const popRow = population.data?.rows[0];
-  const labRow = labour.data?.rows[0];
-  const ecoRow = economy.data?.rows[0];
-  const engRow = energy.data?.rows[0];
-
-  const categories = useMemo(
-    () => [
+    return [
       {
         id: "population" as const,
-        label: "Population",
-        Icon: Users,
-        value:
-          popRow !== undefined
-            ? (popRow.TotaleBevolking_1 ?? 0).toLocaleString("nl-NL")
-            : "—",
+        label: "Europe",
+        Icon: Globe,
+        value: formatPop(sum("europe")),
       },
       {
         id: "labour" as const,
-        label: "Labour",
-        Icon: Briefcase,
-        value:
-          labRow !== undefined
-            ? `${(labRow.NietSeizoengecorrigeerd_1 ?? 0).toLocaleString("nl-NL")}k`
-            : "—",
+        label: "Americas",
+        Icon: Map,
+        value: formatPop(sum("americas")),
       },
       {
         id: "economy" as const,
-        label: "Economy",
-        Icon: TrendingUp,
-        value:
-          ecoRow !== undefined
-            ? `${ecoRow.Volumemutaties_1?.toFixed(1) ?? "—"}%`
-            : "—",
+        label: "Asia",
+        Icon: Building2,
+        value: formatPop(sum("asia")),
       },
       {
         id: "energy" as const,
-        label: "Energy",
-        Icon: Zap,
-        value:
-          engRow !== undefined
-            ? `${(engRow.TotaalAanbodTPES_1 ?? 0).toLocaleString("nl-NL")} PJ`
-            : "—",
+        label: "Africa",
+        Icon: Sun,
+        value: formatPop(sum("africa")),
       },
-    ],
-    [popRow, labRow, ecoRow, engRow],
-  );
+    ];
+  }, [countries]);
 
   return (
     <div className="flex flex-col gap-6">
       <ViewHeader
-        title="CBS Netherlands"
-        subtitle="Statistics Netherlands — Open Data Dashboard"
-        updatedAt="May 2026"
+        title="World Population"
+        subtitle="REST Countries — Live Open Data"
+        updatedAt="2024"
       />
       <p className="text-sm text-slate-500 -mt-2">
-        Click a category to explore detailed statistics.
+        Click a region to explore countries and sub-regions.
       </p>
       <CbsOverviewFlow categories={categories} loading={isLoading} />
     </div>

@@ -1,7 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
-import { Zap } from "lucide-react";
-import { useDashboardStore } from "../store/dashboard.store";
-import { useEnergy } from "../hooks/use-energy";
+import { Sun } from "lucide-react";
+import { useCountriesByRegion, formatPop } from "../hooks/use-countries";
 import { StatsBar } from "../components/stats-bar";
 import { CategoryBreakdownFlow } from "../components/flows/category-breakdown-flow";
 import { ViewHeader } from "@/shared/components/view-header";
@@ -9,82 +8,81 @@ import type { Stat } from "../components/stats-bar";
 import type { DimensionItem } from "../components/flows/category-breakdown-flow";
 
 export const EnergyView = () => {
-  const { tableStates } = useDashboardStore();
-  const state = tableStates.energy;
-  const { data, isLoading, error } = useEnergy(state);
+  const {
+    data: countries = [],
+    isLoading,
+    error,
+  } = useCountriesByRegion("africa");
 
-  const rows = data?.rows ?? [];
-  const firstRow = rows[0];
+  const sorted = useMemo(
+    () => [...countries].sort((a, b) => b.population - a.population),
+    [countries],
+  );
 
-  const periods = useMemo(
+  const subregions = useMemo(
+    () => [...new Set(sorted.map((c) => c.subregion).filter(Boolean))].sort(),
+    [sorted],
+  );
+
+  const [selected, setSelected] = useState("");
+  const activeSub = (selected || subregions[0]) ?? "";
+
+  const activeCountries = useMemo(
     () =>
-      [...new Set(rows.map((r) => r.Perioden))].sort((a, b) =>
-        b.localeCompare(a),
-      ),
-    [rows],
+      activeSub
+        ? sorted.filter((c) => c.subregion === activeSub)
+        : sorted.slice(0, 6),
+    [sorted, activeSub],
+  );
+
+  const regionTotal = useMemo(
+    () => sorted.reduce((s, c) => s + c.population, 0),
+    [sorted],
+  );
+
+  const subTotal = useMemo(
+    () => activeCountries.reduce((s, c) => s + c.population, 0),
+    [activeCountries],
   );
 
   const sparkData = useMemo(
-    () => rows.slice(0, 8).map((r) => r.TotaalAanbodTPES_1 ?? 0),
-    [rows],
-  );
-
-  const [selectedPeriod, setSelectedPeriod] = useState<string>("");
-  const activePeriod =
-    selectedPeriod !== "" ? selectedPeriod : (periods[0] ?? "");
-  const activeRow = rows.find((r) => r.Perioden === activePeriod) ?? firstRow;
-
-  const handlePeriodChange = useCallback(
-    (period: string) => setSelectedPeriod(period),
-    [],
+    () => sorted.slice(0, 8).map((c) => c.population),
+    [sorted],
   );
 
   const stats: Stat[] =
-    activeRow !== undefined
+    sorted.length > 0
       ? [
           {
-            label: "Total Supply",
-            value: `${(activeRow.TotaalAanbodTPES_1 ?? 0).toLocaleString("nl-NL")} PJ`,
-            sub: "TPES",
-            icon: <Zap className="h-5 w-5" />,
-            sparkData: rows.slice(0, 8).map((r) => r.TotaalAanbodTPES_1 ?? 0),
+            label: "Total Population",
+            value: formatPop(regionTotal),
+            sub: `${sorted.length} countries`,
+            icon: <Sun className="h-5 w-5" />,
+            sparkData,
           },
         ]
       : [];
 
-  const dimensions: DimensionItem[] =
-    activeRow !== undefined
-      ? [
-          {
-            id: "total-supply",
-            label: "Total Supply",
-            value: `${(activeRow.TotaalAanbodTPES_1 ?? 0).toLocaleString("nl-NL")} PJ`,
-            isNegative: false,
-          },
-          {
-            id: "net-import",
-            label: "Net Import",
-            value: `${(activeRow.NettoInvoer_5 ?? 0).toLocaleString("nl-NL")} PJ`,
-            isNegative: (activeRow.NettoInvoer_5 ?? 0) < 0,
-          },
-        ]
-      : [];
+  const dimensions: DimensionItem[] = activeCountries.slice(0, 6).map((c) => ({
+    id: c.cca3,
+    label: c.name.common,
+    value: formatPop(c.population),
+    isNegative: false,
+  }));
+
+  const handleChange = useCallback((s: string) => setSelected(s), []);
 
   return (
     <div className="flex flex-col gap-6">
-      <ViewHeader title="Energy" updatedAt="May 2026" />
+      <ViewHeader title="Africa" updatedAt="2024" />
       <StatsBar stats={stats} loading={isLoading} />
       <CategoryBreakdownFlow
-        periods={periods}
-        selectedPeriod={activePeriod}
-        onPeriodChange={handlePeriodChange}
-        primaryLabel="Total Supply (TPES)"
-        primaryValue={
-          activeRow !== undefined
-            ? `${(activeRow.TotaalAanbodTPES_1 ?? 0).toLocaleString("nl-NL")} PJ`
-            : "—"
-        }
-        primaryUnit="petajoules"
+        periods={subregions}
+        selectedPeriod={activeSub}
+        onPeriodChange={handleChange}
+        primaryLabel="Population"
+        primaryValue={formatPop(subTotal)}
+        primaryUnit="people"
         sparkData={sparkData}
         dimensions={dimensions}
         loading={isLoading}

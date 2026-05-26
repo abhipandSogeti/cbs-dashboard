@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState, useCallback } from "react";
 import {
   ReactFlow,
   Background,
@@ -6,6 +6,7 @@ import {
   type Node,
   type Edge,
   type NodeTypes,
+  type NodeMouseHandler,
 } from "@xyflow/react";
 import { clsx } from "clsx";
 import { PrimaryStatNode } from "../nodes/primary-stat-node";
@@ -36,7 +37,6 @@ type CategoryBreakdownFlowProps = {
   error: Error | null;
 };
 
-// Compute evenly-spaced x positions for N dimension nodes
 function getDimensionPositions(count: number): Array<{ x: number; y: number }> {
   const y = 280;
   if (count === 0) return [];
@@ -65,6 +65,23 @@ export const CategoryBreakdownFlow = ({
   loading,
   error,
 }: CategoryBreakdownFlowProps) => {
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+
+  const handleNodeClick = useCallback<NodeMouseHandler>((_evt, node) => {
+    if (node.type === "dimension") {
+      setSelectedNodeId((prev) => (prev === node.id ? null : node.id));
+    }
+  }, []);
+
+  // Reset selection when subregion changes
+  const handlePeriodChange = useCallback(
+    (period: string) => {
+      setSelectedNodeId(null);
+      onPeriodChange(period);
+    },
+    [onPeriodChange],
+  );
+
   const nodes: Node[] = useMemo(() => {
     if (loading) {
       return [
@@ -117,6 +134,7 @@ export const CategoryBreakdownFlow = ({
           label: dim.label,
           value: dim.value,
           isNegative: dim.isNegative,
+          isSelected: dim.id === selectedNodeId,
         },
         selectable: false,
         draggable: false,
@@ -130,34 +148,46 @@ export const CategoryBreakdownFlow = ({
     primaryUnit,
     sparkData,
     dimensions,
+    selectedNodeId,
   ]);
 
   const edges: Edge[] = useMemo(() => {
     if (loading || error !== null) return [];
-    return dimensions.map((dim) => ({
-      id: `primary-${dim.id}`,
-      source: "primary",
-      target: dim.id,
-      style: {
-        stroke: dim.isNegative ? "#f87171" : "#0d9488",
-        strokeWidth: 1.5,
-      },
-    }));
-  }, [loading, error, dimensions]);
+    const hasSelection = selectedNodeId !== null;
+    return dimensions.map((dim) => {
+      const isSelected = dim.id === selectedNodeId;
+      return {
+        id: `primary-${dim.id}`,
+        source: "primary",
+        target: dim.id,
+        animated: isSelected,
+        style: {
+          stroke: isSelected
+            ? "#ec4899"
+            : hasSelection
+              ? "#cbd5e1"
+              : dim.isNegative
+                ? "#f87171"
+                : "#0d9488",
+          strokeWidth: isSelected ? 2.5 : 1.5,
+          opacity: hasSelection && !isSelected ? 0.35 : 1,
+        },
+      };
+    });
+  }, [loading, error, dimensions, selectedNodeId]);
 
   return (
     <div className="flex flex-col gap-3">
-      {/* Period selector — plain HTML pill bar */}
       {periods.length > 0 && (
         <div
           className="flex gap-2 overflow-x-auto pb-1 pt-1"
           role="group"
-          aria-label="Select time period"
+          aria-label="Select subregion"
         >
           {periods.map((period) => (
             <button
               key={period}
-              onClick={() => onPeriodChange(period)}
+              onClick={() => handlePeriodChange(period)}
               aria-pressed={period === selectedPeriod}
               className={clsx(
                 "shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors",
@@ -172,8 +202,8 @@ export const CategoryBreakdownFlow = ({
         </div>
       )}
 
-      {/* React Flow breakdown canvas */}
       <div
+        key={loading ? "loading" : selectedPeriod}
         className="h-[400px] rounded-2xl overflow-hidden border border-slate-200"
         aria-label={`${primaryLabel} data breakdown`}
       >
@@ -181,6 +211,7 @@ export const CategoryBreakdownFlow = ({
           nodes={nodes}
           edges={edges}
           nodeTypes={nodeTypes}
+          onNodeClick={handleNodeClick}
           fitView
           fitViewOptions={{ padding: 0.25 }}
           nodesDraggable={false}
