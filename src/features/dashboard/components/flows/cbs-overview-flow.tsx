@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import {
   ReactFlow,
   Background,
@@ -47,37 +47,44 @@ export const CbsOverviewFlow = ({
 }: CbsOverviewFlowProps) => {
   const { setActiveView } = useDashboardStore();
 
-  const nodes: Node[] = [
-    {
-      id: "hub",
-      type: "hub",
-      position: HUB_POS,
-      data: { label: "CBS Netherlands" },
-      selectable: false,
-      draggable: false,
-    },
-    ...categories.map((cat) => ({
-      id: cat.id,
-      type: "category",
-      position: POSITIONS[cat.id] ?? { x: 0, y: 0 },
-      data: {
-        label: cat.label,
-        value: loading ? "…" : cat.value,
-        trend: cat.trend,
-        Icon: cat.Icon,
+  const nodes: Node[] = useMemo(
+    () => [
+      {
+        id: "hub",
+        type: "hub",
+        position: HUB_POS,
+        data: { label: "CBS Netherlands" },
+        selectable: false,
+        draggable: false,
       },
-      selectable: false,
-      draggable: false,
-    })),
-  ];
+      ...categories.map((cat) => ({
+        id: cat.id,
+        type: "category",
+        position: POSITIONS[cat.id] ?? { x: 0, y: 0 },
+        data: {
+          label: cat.label,
+          value: loading ? "…" : cat.value,
+          trend: cat.trend,
+          Icon: cat.Icon,
+        },
+        selectable: false,
+        draggable: false,
+      })),
+    ],
+    [categories, loading],
+  );
 
-  const edges: Edge[] = categories.map((cat) => ({
-    id: `hub-${cat.id}`,
-    source: "hub",
-    target: cat.id,
-    animated: true,
-    style: { stroke: "#0d9488", strokeWidth: 2 },
-  }));
+  const edges: Edge[] = useMemo(
+    () =>
+      categories.map((cat) => ({
+        id: `hub-${cat.id}`,
+        source: "hub",
+        target: cat.id,
+        animated: true,
+        style: { stroke: "#0d9488", strokeWidth: 2 },
+      })),
+    [categories],
+  );
 
   const handleNodeClick = useCallback<NodeMouseHandler>(
     (_evt, node) => {

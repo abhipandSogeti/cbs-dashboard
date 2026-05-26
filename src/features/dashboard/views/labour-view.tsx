@@ -24,6 +24,11 @@ export const LabourView = () => {
     [rows],
   );
 
+  const sparkData = useMemo(
+    () => rows.slice(0, 8).map((r) => r.NietSeizoengecorrigeerd_1 ?? 0),
+    [rows],
+  );
+
   const [selectedPeriod, setSelectedPeriod] = useState<string>("");
   const activePeriod =
     selectedPeriod !== "" ? selectedPeriod : (periods[0] ?? "");
@@ -82,9 +87,7 @@ export const LabourView = () => {
             : "—"
         }
         primaryUnit="x1000 persons"
-        sparkData={rows
-          .slice(0, 8)
-          .map((r) => r.NietSeizoengecorrigeerd_1 ?? 0)}
+        sparkData={sparkData}
         dimensions={dimensions}
         loading={isLoading}
         error={error ?? null}

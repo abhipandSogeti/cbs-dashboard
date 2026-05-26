@@ -1,3 +1,4 @@
+// tests/msw/handlers.ts
 import { http, HttpResponse } from 'msw';
 const CBS_BASE = 'https://opendata.cbs.nl/ODataFeed/odata';
 export const mockPopulationResponse = {
@@ -45,12 +46,14 @@ const countCounts = {
     '83140ned': '300',
 };
 export const handlers = [
+    // Count endpoints — must be before data endpoints so the more-specific path wins
     http.get(/\/ODataFeed\/odata\/([^/]+)\/TypedDataSet\/\$count/, ({ request }) => {
         const url = new URL(request.url);
         const match = url.pathname.match(/\/([^/]+)\/TypedDataSet\/\$count$/);
         const datasetId = match?.[1] ?? '';
         return HttpResponse.text(countCounts[datasetId] ?? '0');
     }),
+    // Data endpoints
     http.get(`${CBS_BASE}/37296ned/TypedDataSet`, () => HttpResponse.json(mockPopulationResponse)),
     http.get(`${CBS_BASE}/80590ned/TypedDataSet`, () => HttpResponse.json(mockLabourResponse)),
     http.get(`${CBS_BASE}/70076ned/TypedDataSet`, () => HttpResponse.json(mockEconomyResponse)),
