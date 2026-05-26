@@ -1,34 +1,48 @@
-// src/features/dashboard/components/sidebar.tsx
 import { clsx } from 'clsx'
+import { Users, Briefcase, TrendingUp, Zap } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { useDashboardStore, type ViewId } from '../store/dashboard.store'
 
-const views: { id: ViewId; label: string }[] = [
-  { id: 'population', label: 'Population' },
-  { id: 'labour',     label: 'Labour' },
-  { id: 'economy',    label: 'Economy' },
-  { id: 'energy',     label: 'Energy' },
+const views: { id: ViewId; label: string; Icon: LucideIcon }[] = [
+  { id: 'population', label: 'Population', Icon: Users },
+  { id: 'labour',     label: 'Labour',     Icon: Briefcase },
+  { id: 'economy',    label: 'Economy',    Icon: TrendingUp },
+  { id: 'energy',     label: 'Energy',     Icon: Zap },
 ]
 
 export const Sidebar = () => {
   const { activeView, setActiveView } = useDashboardStore()
 
   return (
-    <aside className="flex w-52 shrink-0 flex-col border-r border-neutral-200 px-3 py-6">
-      <span className="mb-6 px-3 text-xs font-semibold uppercase tracking-widest text-neutral-400">
-        CBS Netherlands
-      </span>
-      <nav className="flex flex-col gap-1">
-        {views.map(({ id, label }) => (
+    <aside className="flex w-60 shrink-0 flex-col border-r border-slate-200 bg-white px-3 py-6">
+      {/* Brand */}
+      <div className="mb-6 flex items-center gap-2 px-3">
+        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-teal-600 text-xs font-bold text-white">
+          CBS
+        </span>
+        <div className="flex flex-col leading-tight">
+          <span className="text-sm font-bold text-slate-900">CBS</span>
+          <span className="text-xs text-slate-400">Netherlands</span>
+        </div>
+      </div>
+
+      {/* Nav section */}
+      <p className="mb-1 px-3 text-xs font-medium uppercase tracking-widest text-slate-400">
+        DATA
+      </p>
+      <nav className="flex flex-col gap-0.5">
+        {views.map(({ id, label, Icon }) => (
           <button
             key={id}
             onClick={() => setActiveView(id)}
             className={clsx(
-              'rounded-md px-3 py-2 text-left text-sm transition-colors',
+              'flex items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-colors',
               activeView === id
-                ? 'bg-neutral-900 font-medium text-white'
-                : 'text-neutral-600 hover:bg-neutral-100'
+                ? 'border-l-2 border-teal-600 bg-teal-50 font-medium text-teal-700'
+                : 'border-l-2 border-transparent text-slate-600 hover:bg-slate-50'
             )}
           >
+            <Icon className="h-4 w-4 shrink-0" />
             {label}
           </button>
         ))}

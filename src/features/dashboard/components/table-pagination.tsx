@@ -1,4 +1,3 @@
-// src/features/dashboard/components/table-pagination.tsx
 import type { Table } from '@tanstack/react-table'
 
 type TablePaginationProps<T> = {
@@ -12,27 +11,32 @@ export const TablePagination = <T,>({ table, totalRows }: TablePaginationProps<T
   const to = Math.min((pageIndex + 1) * pageSize, totalRows)
 
   return (
-    <div className="flex items-center justify-between text-sm text-neutral-600">
+    <div className="flex items-center justify-between text-sm text-slate-500">
       <span>
-        {from}–{to} of {totalRows.toLocaleString('nl-NL')} rows
+        Showing {from.toLocaleString('nl-NL')}–{to.toLocaleString('nl-NL')} of{' '}
+        {totalRows.toLocaleString('nl-NL')} rows
       </span>
       <div className="flex items-center gap-2">
         <button
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
-          className="px-3 py-1.5 rounded border border-neutral-200 disabled:opacity-40 hover:bg-neutral-50 transition-colors"
+          className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm shadow-sm transition-colors hover:bg-slate-50 disabled:opacity-40"
         >
-          Previous
+          ← Previous
         </button>
-        <span className="px-2">
-          Page {pageIndex + 1} of {table.getPageCount()}
+        <span className="text-sm text-slate-500">
+          Page{' '}
+          <span className="rounded bg-teal-50 px-2 py-0.5 font-medium text-teal-700">
+            {pageIndex + 1}
+          </span>{' '}
+          of {table.getPageCount().toLocaleString('nl-NL')}
         </span>
         <button
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
-          className="px-3 py-1.5 rounded border border-neutral-200 disabled:opacity-40 hover:bg-neutral-50 transition-colors"
+          className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm shadow-sm transition-colors hover:bg-slate-50 disabled:opacity-40"
         >
-          Next
+          Next →
         </button>
       </div>
     </div>
