@@ -68,6 +68,13 @@ export const LabourView = () => {
     label: c.name.common,
     value: formatPop(c.population),
     isNegative: false,
+    detail: {
+      flag: c.flag ?? "🏳",
+      capital: c.capital[0] ?? "",
+      area: c.area,
+      borders: c.borders.length,
+      population: formatPop(c.population),
+    },
   }));
 
   const handleChange = useCallback((s: string) => setSelected(s), []);
