@@ -64,7 +64,7 @@ Ensures feature work runs in an isolated git worktree before any code is written
 /brainstorming        → explore intent, constraints, success criteria
 /adr                  → record any library/architecture choice made during brainstorming
 /writing-plans        → TDD task breakdown
-⏸️ wait for go-ahead
+wait for go-ahead
 ```
 
 ADR is gated here — any decision that would confuse a future engineer gets recorded before code starts.

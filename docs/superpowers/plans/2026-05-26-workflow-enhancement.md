@@ -56,7 +56,7 @@ The full replacement block for `## Skill-Driven Workflow` (everything between th
 2. `/brainstorming` — explore intent, constraints, success criteria
 3. `/adr` — record any library or architecture choice surfaced during brainstorming
 4. `/writing-plans` — TDD task breakdown
-5. ⏸️ Wait for go-ahead
+5. Wait for go-ahead
 
 #### Phase 3 — BUILD
 
